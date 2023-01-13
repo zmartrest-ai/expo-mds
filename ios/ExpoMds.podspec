@@ -17,6 +17,9 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
 
+  # pod 'Movesense', :git => 'ssh://git@altssh.bitbucket.org:443/movesense/movesense-mobile-lib.git'
+  s.dependency 'Movesense'
+
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',

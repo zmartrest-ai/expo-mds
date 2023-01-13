@@ -1,6 +1,7 @@
 import ExpoModulesCore
 
 public class ExpoMdsModule: Module {
+    lazy var mds = MdsService()
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
   // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -16,12 +17,83 @@ public class ExpoMdsModule: Module {
     ])
 
     // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+    Events("newScannedDevice", "newNotification", "newNotificationError")
 
     // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      return "Hello world! 👋"
+    Function("scan") {
+        func handleScannedDevice(device: MovesenseDevice) {
+            let deviceSend = ["name": device.localName, "address": device.uuid.uuidString] as [String : Any]
+            self.sendEvent( "newScannedDevice", deviceSend )
+        }
+        self.mds.startScan({device in handleScannedDevice(device: device)}, {})
     }
+      
+      
+      
+      Function("stopScan") {
+          self.mds.stopScan()
+      }
+      
+      
+      Function("connect") { (address: String) in
+        // Send an event to JavaScript.
+        self.mds.connectDevice(address)
+      }
+      
+      Function("disconnect") { (address: String) in
+        // Send an event to JavaScript.
+        self.mds.disconnectDevice(address)
+      }
+      
+      AsyncFunction("get") { (uri: String,
+                         parameters: Dictionary<String, Any>, promise: Promise) in
+        // Send an event to JavaScript.
+          self.mds.get(uri, parameters, { response in
+              promise.resolve(response)
+          }, { e in
+              promise.reject("MdsError", e)
+          })
+      }
+      
+      AsyncFunction("post") { (uri: String,
+                         parameters: Dictionary<String, Any>, promise: Promise) in
+        // Send an event to JavaScript.
+          self.mds.post(uri, parameters, { response in
+              promise.resolve(response)
+          }, { e in
+              promise.reject("MdsError", e)
+          })
+      }
+      
+      AsyncFunction("put") { (uri: String,
+                         parameters: Dictionary<String, Any>, promise: Promise) in
+        // Send an event to JavaScript.
+          self.mds.put(uri, parameters, { response in
+              promise.resolve(response)
+          }, { e in
+              promise.reject("MdsError", e)
+          })
+      }
+      
+      AsyncFunction("delete") { (uri: String,
+                         parameters: Dictionary<String, Any>, promise: Promise) in
+        // Send an event to JavaScript.
+          self.mds.del(uri, parameters, { response in
+              promise.resolve(response)
+          }, { e in
+              promise.reject("MdsError", e)
+          })
+      }
+      
+      Function("subscribe") { (uri: String,
+                         parameters: Dictionary<String, Any>) in
+        // Send an event to JavaScript.
+          self.mds.subscribe(uri, parameters: parameters, onNotify: { payload in
+              self.sendEvent("newScannedDevice", [payload: payload])
+          }, onError: { (uri, reason) in
+              self.sendEvent("newNotificationError", [uri: uri, reason: reason])
+          })
+      }
 
     // Defines a JavaScript function that always returns a Promise and whose native code
     // is by default dispatched on the different thread than the JavaScript runtime runs on.

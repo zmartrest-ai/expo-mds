@@ -15,6 +15,7 @@ PODS:
     - ExpoModulesCore
   - ExpoMds (0.1.0):
     - ExpoModulesCore
+    - Movesense
   - ExpoModulesCore (1.1.1):
     - React-Core
     - ReactCommon/turbomodule/core
@@ -28,6 +29,7 @@ PODS:
     - ReactCommon/turbomodule/core (= 0.70.5)
   - fmt (6.2.1)
   - glog (0.3.5)
+  - Movesense (1.68.0)
   - RCT-Folly (2021.07.22.00):
     - boost
     - DoubleConversion
@@ -319,6 +321,7 @@ DEPENDENCIES:
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+  - "Movesense (from `ssh://git@altssh.bitbucket.org:443/movesense/movesense-mobile-lib.git`)"
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
   - RCTTypeSafety (from `../node_modules/react-native/Libraries/TypeSafety`)
@@ -379,6 +382,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/React/FBReactNativeSpec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
+  Movesense:
+    :git: "ssh://git@altssh.bitbucket.org:443/movesense/movesense-mobile-lib.git"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTRequired:
@@ -434,6 +439,11 @@ EXTERNAL SOURCES:
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
+CHECKOUT OPTIONS:
+  Movesense:
+    :commit: c773adc925eb9303701da51b32efa7dcee9ad0cf
+    :git: "ssh://git@altssh.bitbucket.org:443/movesense/movesense-mobile-lib.git"
+
 SPEC CHECKSUMS:
   boost: a7c83b31436843459a1961bfd74b96033dc77234
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
@@ -443,12 +453,13 @@ SPEC CHECKSUMS:
   EXFont: 319606bfe48c33b5b5063fb0994afdc496befe80
   Expo: b9fa98bf260992312ee3c424400819fb9beadafe
   ExpoKeepAwake: 69b59d0a8d2b24de9f82759c39b3821fec030318
-  ExpoMds: 746f2f9873d13904307d67aa83acbec559976402
+  ExpoMds: ac2f34c715e09798f441177347451758a9fbc3be
   ExpoModulesCore: 485dff3a59b036a33b6050c0a5aea3cf1037fdd1
   FBLazyVector: affa4ba1bfdaac110a789192f4d452b053a86624
   FBReactNativeSpec: fe8b5f1429cfe83a8d72dc8ed61dc7704cac8745
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
+  Movesense: 24105140ddd6232c45802d94a37687edbca41dca
   RCT-Folly: 0080d0a6ebf2577475bda044aa59e2ca1f909cda
   RCTRequired: 21229f84411088e5d8538f21212de49e46cc83e2
   RCTTypeSafety: 62eed57a32924b09edaaf170a548d1fc96223086
@@ -477,6 +488,6 @@ SPEC CHECKSUMS:
   ReactCommon: c9246996e73bf75a2c6c3ff15f1e16707cdc2da9
   Yoga: eca980a5771bf114c41a754098cd85e6e0d90ed7
 
-PODFILE CHECKSUM: b4c3225b0f734817bece7f906d52db5d6c7b9cc7
+PODFILE CHECKSUM: bbb867a728bafed6211aa8210ef4fac4873cd89c
 
 COCOAPODS: 1.11.3
