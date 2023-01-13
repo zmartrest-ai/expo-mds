@@ -24,14 +24,17 @@ public class ExpoMdsModule: Module {
         func handleScannedDevice(device: MovesenseDevice) {
             let deviceSend = ["name": device.localName, "address": device.uuid.uuidString] as [String : Any]
             self.sendEvent( "newScannedDevice", deviceSend )
+      
         }
         self.mds.startScan({device in handleScannedDevice(device: device)}, {})
     }
       
-      
-      
       Function("stopScan") {
           self.mds.stopScan()
+      }
+      
+      Function("unsubscribe") { (uri: String) in
+        self.mds.unsubscribe(uri)
       }
       
       
@@ -86,12 +89,18 @@ public class ExpoMdsModule: Module {
       }
       
       Function("subscribe") { (uri: String,
-                         parameters: Dictionary<String, Any>) in
+                               parameters: Dictionary<String, Any>, key: String) in
         // Send an event to JavaScript.
-          self.mds.subscribe(uri, parameters: parameters, onNotify: { payload in
-              self.sendEvent("newScannedDevice", [payload: payload])
-          }, onError: { (uri, reason) in
-              self.sendEvent("newNotificationError", [uri: uri, reason: reason])
+          self.mds.subscribe(uri, parameters: parameters, onNotify: { notification in
+              self.sendEvent("newNotification", [
+                "notification": notification,
+                "key": key
+              ])
+          }, onError: { (uri, error) in
+              self.sendEvent("newNotificationError", [
+                "uri": uri,
+                                                    "error": error,
+                                                    "key": key])
           })
       }
 

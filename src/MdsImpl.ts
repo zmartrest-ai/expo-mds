@@ -1,25 +1,75 @@
 import { EventEmitter, Subscription } from "expo-modules-core";
-import {
-  DeviceEventEmitter,
-  EmitterSubscription,
-  Platform,
-} from "react-native";
+import { DeviceEventEmitter, Platform } from "react-native";
 
 import ReactMds from "./RNMds";
 
 const URI_PREFIX = "suunto://";
 
-type OnDeviceConnected = (serial: string) => void;
+type OnDeviceConnected = (serial: string, address: string) => void;
 type OnDeviceDiscovered = (name: string, address: string) => void;
+
+const mdsEmitter = new EventEmitter(ReactMds);
+
+interface Response {
+  Body: ConnectionBody | HRBody;
+  Method: "POST" | "GET" | "PUT" | "DEL";
+  Uri: string;
+  Response?: {
+    // only sent for requests (not subscriptions)
+    Status: number;
+  };
+}
+
+interface HRBody {
+  average: number;
+  rrData: number[];
+}
+
+interface ConnectionBody {
+  Connection: Connection;
+  DeviceInfo: DeviceInfo;
+  Serial: string;
+}
+
+interface DeviceInfo {
+  Description: string;
+  Mode: number;
+  Name: string;
+  Serial: string;
+  SwVersion: string;
+  additionalVersionInfo?: any;
+  addressInfo: unknown[];
+  apiLevel: string;
+  brandName?: any;
+  design?: any;
+  hw: string;
+  hwCompatibilityId: string;
+  manufacturerName: string;
+  pcbaSerial: string;
+  productName: string;
+  serial: string;
+  sw: string;
+  variant: string;
+}
+
+interface Connection {
+  Type: string;
+  UUID: string;
+}
 
 class MDSImpl {
   subsKey: number;
-  subsKeys: unknown[];
-  subsSuccessCbs: ((notification: string) => void)[];
-  subsErrorCbs: ((error: Error) => void)[];
+  callbacks: Record<
+    string,
+    {
+      success: (notification: string) => void;
+      error: (error: Error) => void;
+      uri: string;
+    }
+  >;
   mdsEmitter: null | EventEmitter | boolean;
   subscribedToConnectedDevices: boolean;
-  connectedDevicesSubscription: number;
+  connectedDevicesSubscription: string | undefined;
   onDeviceConnected: OnDeviceConnected | undefined;
   onDeviceDisconnected: OnDeviceConnected | undefined;
   onNewScannedDevice: OnDeviceDiscovered | undefined;
@@ -29,23 +79,39 @@ class MDSImpl {
 
   constructor() {
     this.subsKey = 0;
-    this.subsKeys = [];
-    this.subsSuccessCbs = [];
-    this.subsErrorCbs = [];
+    this.callbacks = {};
     this.mdsEmitter = null;
     this.subscribedToConnectedDevices = false;
-    this.connectedDevicesSubscription = -1;
-  }
-
-  getIdxFromKey(key: string) {
-    let idx = -1;
-    for (let i = 0; i < this.subsKeys.length; i++) {
-      if (this.subsKeys[i] == key) {
-        idx = i;
-        break;
-      }
+    this.connectedDevicesSubscription = undefined;
+    if (Platform.OS === "android") {
+      DeviceEventEmitter.addListener(
+        "newScannedDevice",
+        this.handleNewScannedDevice.bind(this)
+      );
+      DeviceEventEmitter.addListener(
+        "newNotification",
+        this.handleNewNotification.bind(this)
+      );
+      DeviceEventEmitter.addListener(
+        "newNotificationError",
+        this.handleNewNotificationError.bind(this)
+      );
+      this.mdsEmitter = true;
+    } else {
+      this.scanSubscription = mdsEmitter.addListener(
+        "newScannedDevice",
+        this.handleNewScannedDevice.bind(this)
+      );
+      this.newNotificationSubscription = mdsEmitter.addListener(
+        "newNotification",
+        this.handleNewNotification.bind(this)
+      );
+      this.newNotificationErrorSubscription = mdsEmitter.addListener(
+        "newNotificationError",
+        this.handleNewNotificationError.bind(this)
+      );
+      this.mdsEmitter = mdsEmitter;
     }
-    return idx;
   }
 
   subscribeToConnectedDevices() {
@@ -55,84 +121,58 @@ class MDSImpl {
       "MDS/ConnectedDevices",
       {},
       (notification) => {
-        const data = JSON.parse(notification);
+        // console.log("connectedDevices", notification);
+        const data = JSON.parse(notification) as Response;
+        const address = data["Body"]["Connection"]?.["UUID"];
         if (data["Method"] == "POST") {
           if (data.hasOwnProperty("Body")) {
             if (data["Body"].hasOwnProperty("DeviceInfo")) {
               if (data["Body"]["DeviceInfo"].hasOwnProperty("Serial")) {
-                this.onDeviceConnected?.(data["Body"]["DeviceInfo"]["Serial"]);
+                const serial = data["Body"]["DeviceInfo"]["Serial"];
+                this.connectedDevice = { serial, address };
+                this.onDeviceConnected?.(serial, address);
               }
             } else if (data["Body"].hasOwnProperty("Serial")) {
-              this.onDeviceConnected?.(data["Body"]["Serial"]);
+              const serial = data["Body"]["Serial"];
+              this.connectedDevice = { serial, address };
+              this.onDeviceConnected?.(serial, address);
             }
           }
         } else if (data["Method"] == "DEL") {
           if (data["Body"].hasOwnProperty("Serial")) {
-            this.onDeviceDisconnected?.(data["Body"]["Serial"]);
+            this.connectedDevice = undefined;
+            this.onDeviceDisconnected?.(data["Body"]["Serial"], address);
           }
         }
       },
       (error) => {
-        console.log("MDS subscribe error");
-        this.unsubscribe(this.connectedDevicesSubscription);
+        console.log("MDS subscribe error", error);
+        if (this.connectedDevicesSubscription) {
+          this.unsubscribe(this.connectedDevicesSubscription);
+        }
         this.subscribedToConnectedDevices = false;
       }
     );
   }
 
-  initMdsEmitter() {
-    if (this.mdsEmitter) {
-      return;
-    }
-
-    if (Platform.OS === "android") {
-      DeviceEventEmitter.addListener(
-        "newScannedDevice",
-        this.handleNewScannedDevice
-      );
-      DeviceEventEmitter.addListener(
-        "newNotification",
-        this.handleNewNotification
-      );
-      DeviceEventEmitter.addListener(
-        "newNotificationError",
-        this.handleNewNotificationError
-      );
-      this.mdsEmitter = true;
-    } else {
-      const mdsEmitter = new EventEmitter(ReactMds);
-
-      this.scanSubscription = mdsEmitter.addListener(
-        "newScannedDevice",
-        this.handleNewScannedDevice
-      );
-      this.newNotificationSubscription = mdsEmitter.addListener(
-        "newNotification",
-        this.handleNewNotification
-      );
-      this.newNotificationErrorSubscription = mdsEmitter.addListener(
-        "newNotificationError",
-        this.handleNewNotificationError
-      );
-      this.mdsEmitter = mdsEmitter;
-    }
-  }
-
   handleNewScannedDevice(e: Event & { name: string; address: string }) {
+    console.log("handleNewScannedDevice", e);
+    console.log("callback to call", this.onNewScannedDevice);
     this.onNewScannedDevice?.(e.name, e.address);
   }
 
   handleNewNotification(e: Event & { notification: string; key: string }) {
-    this.subsSuccessCbs[this.getIdxFromKey(e.key)](e.notification);
+    console.log("handleNewNotification", e);
+    this.callbacks[e.key]?.success?.(e.notification);
   }
 
   handleNewNotificationError(e: Event & { error: Error; key: string }) {
-    this.subsErrorCbs[this.getIdxFromKey(e.key)](e.error);
+    console.log("handleNewNotificationError", e);
+    this.callbacks[e.key]?.error?.(e.error);
   }
 
   scan(scanHandler: OnDeviceDiscovered) {
     this.onNewScannedDevice = scanHandler;
-    this.initMdsEmitter();
     ReactMds.scan();
   }
 
@@ -140,11 +180,24 @@ class MDSImpl {
     ReactMds.stopScan();
   }
 
+  connectedDevice:
+    | {
+        serial: string;
+        address: string;
+      }
+    | undefined;
+
   setHandlers(
     deviceConnected: OnDeviceConnected,
     deviceDisconnected: OnDeviceConnected
   ) {
     this.onDeviceConnected = deviceConnected;
+    if (this.connectedDevice) {
+      deviceConnected(
+        this.connectedDevice.serial,
+        this.connectedDevice.address
+      );
+    }
     this.onDeviceDisconnected = deviceDisconnected;
     if (!this.subscribedToConnectedDevices) {
       this.subscribedToConnectedDevices = true;
@@ -153,7 +206,6 @@ class MDSImpl {
   }
 
   connect(address: string) {
-    this.initMdsEmitter();
     ReactMds.connect(address);
   }
 
@@ -302,33 +354,46 @@ class MDSImpl {
       errorCb == undefined
     ) {
       console.log("MDS subscribe() missing argument(s).");
-      return -1;
+      return undefined;
     }
+
+    this.subsKey++;
+    const subsKeyStr = this.subsKey.toString();
+    this.callbacks[subsKeyStr] = {
+      success: responseCb,
+      error: errorCb,
+      uri,
+    };
+
+    // const key = serial + uri + JSON.stringify(contract);
 
     // should probably be eventListeners for both error and success
     if (Platform.OS === "android") {
       contract["Uri"] = serial + uri;
       ReactMds.subscribe(
         "suunto://MDS/EventListener",
-        JSON.stringify(contract)
+        JSON.stringify(contract),
+        subsKeyStr
       );
     } else {
-      ReactMds.subscribe(URI_PREFIX + serial + uri, contract);
+      ReactMds.subscribe(URI_PREFIX + serial + uri, contract, subsKeyStr);
     }
 
-    return this.subsKey;
+    return subsKeyStr;
   }
 
-  unsubscribe(key: number) {
-    const idx = this.subsKeys.indexOf(key);
-    if (idx == -1) {
-      return false;
+  unsubscribe(key: string) {
+    const uri = this.callbacks[key].uri;
+    delete this.callbacks[key];
+
+    const stillHasCallbacks = Object.values(this.callbacks).some((k) => {
+      return k.uri === uri;
+    });
+
+    if (!stillHasCallbacks) {
+      ReactMds.unsubscribe(key);
     }
 
-    ReactMds.unsubscribe(key.toString());
-    this.subsKeys.splice(idx, 0);
-    this.subsSuccessCbs.splice(idx, 0);
-    this.subsErrorCbs.splice(idx, 0);
     return true;
   }
 }

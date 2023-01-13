@@ -1,6 +1,7 @@
 import MDS from "expo-mds";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  AsyncStorage,
   Button,
   SafeAreaView,
   ScrollView,
@@ -24,6 +25,32 @@ const App = () => {
   const [error, setError] = useState<string>(null);
   const [deviceConnected, setDeviceConnected] =
     useState<ConnectedDevice | null>(null);
+  const [lastSession, setLastSession] = useState<{
+    liveSince?: string;
+    liveLast?: string;
+    dataPoints: number;
+    error: string;
+  }>();
+
+  useEffect(() => {
+    void AsyncStorage.getItem("LAST_SESSION").then((v) => {
+      if (v) {
+        const parsed = JSON.parse(v);
+
+        const liveSince = parsed.liveSince ? new Date(parsed.liveSince) : null;
+        const liveLast = parsed.liveLast ? new Date(parsed.liveLast) : null;
+        const dataPoints = parsed.dataPoints;
+        setLastSession({
+          liveSince: liveSince?.toLocaleString(),
+          liveLast: liveLast?.toLocaleString(),
+          dataPoints,
+          error,
+        });
+        setError(parsed.error);
+      }
+    });
+  }, []);
+
   const [value, setValue] = useState<{
     Uri: string;
     Method: string;
@@ -39,7 +66,7 @@ const App = () => {
     console.log("start scan");
     setScanning(true);
     MDS.scan((name: string, address: string) => {
-      console.log({ name, address });
+      console.log("HELLO", { name, address });
       if (name?.includes("Movesense")) {
         setDevices((prev) => {
           if (prev.find((d) => d.address === address)) {
@@ -61,11 +88,11 @@ const App = () => {
 
   useEffect(() => {
     MDS.setHandlers(
-      (serial: string) => {
+      (serial: string, address: string) => {
         setDeviceConnected({
           serial,
-          address: connectingToDevice.current!.address,
-          name: connectingToDevice.current!.name,
+          address: address ?? connectingToDevice.current?.address,
+          name: address ?? connectingToDevice.current?.name,
         });
       },
       (serial: string) => {
@@ -91,15 +118,34 @@ const App = () => {
           liveLast = new Date();
           dataPoints++;
           setValue(JSON.parse(notification));
+          void AsyncStorage.setItem(
+            "LAST_SESSION",
+            JSON.stringify({
+              liveSince: liveSince?.valueOf(),
+              liveLast: liveLast?.valueOf(),
+              dataPoints,
+            })
+          );
         },
         (e: Error) => {
           console.error(e);
           setError("message" in e ? e.message : e);
+          void AsyncStorage.setItem(
+            "LAST_SESSION",
+            JSON.stringify({
+              liveSince: liveSince?.valueOf(),
+              liveLast: liveLast?.valueOf(),
+              dataPoints,
+              error,
+            })
+          );
         }
       );
 
       return () => {
-        MDS.unsubscribe(key);
+        if (key) {
+          MDS.unsubscribe(key);
+        }
       };
     }
   }, [deviceConnected, stopScan]);
@@ -121,12 +167,13 @@ const App = () => {
         </Text>
         {liveSince ? (
           <Text style={{ color: "black" }}>
-            {"First value received at " + liveSince}
+            {"First value received at " + liveSince.toLocaleString()}
           </Text>
         ) : null}
+
         {liveSince ? (
           <Text style={{ color: "black" }}>
-            {"Last value received at " + liveLast}
+            {"Last value received at " + liveLast?.toLocaleString()}
           </Text>
         ) : null}
         {liveSince && liveLast ? (
@@ -174,6 +221,11 @@ const App = () => {
             );
           })
         )}
+        {lastSession ? (
+          <Text style={{ color: "black" }}>
+            {"Last session: " + JSON.stringify(lastSession, null, 2)}
+          </Text>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
