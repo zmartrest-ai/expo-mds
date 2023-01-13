@@ -15,7 +15,7 @@ interface Response {
   Method: "POST" | "GET" | "PUT" | "DEL";
   Uri: string;
   Response?: {
-    // only sent for requests (not subscriptions)
+    // seemingly only sent for requests (not subscriptions)
     Status: number;
   };
 }
