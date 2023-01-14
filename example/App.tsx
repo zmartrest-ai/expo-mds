@@ -89,6 +89,7 @@ const App = () => {
   useEffect(() => {
     MDS.setHandlers(
       (serial: string, address: string) => {
+        console.log("setDeviceConnected", { serial, address });
         setDeviceConnected({
           serial,
           address: address ?? connectingToDevice.current?.address,
@@ -200,7 +201,9 @@ const App = () => {
             title="Disconnect"
             onPress={() => {
               console.log("disconnect", deviceConnected);
-              MDS.disconnect(deviceConnected.address);
+              const address = deviceConnected.address.replace(/-/g, ":");
+              console.log("address", address);
+              MDS.disconnect(address);
             }}
           />
         ) : (

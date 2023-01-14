@@ -1,5 +1,5 @@
 import { EventEmitter, Subscription } from "expo-modules-core";
-import { DeviceEventEmitter, Platform } from "react-native";
+import { Platform } from "react-native";
 
 import ReactMds from "./RNMds";
 
@@ -38,7 +38,7 @@ interface DeviceInfo {
   Serial: string;
   SwVersion: string;
   additionalVersionInfo?: any;
-  addressInfo: unknown[];
+  addressInfo: { address: string; name: string }[];
   apiLevel: string;
   brandName?: any;
   design?: any;
@@ -83,35 +83,21 @@ class MDSImpl {
     this.mdsEmitter = null;
     this.subscribedToConnectedDevices = false;
     this.connectedDevicesSubscription = undefined;
-    if (Platform.OS === "android") {
-      DeviceEventEmitter.addListener(
-        "newScannedDevice",
-        this.handleNewScannedDevice.bind(this)
-      );
-      DeviceEventEmitter.addListener(
-        "newNotification",
-        this.handleNewNotification.bind(this)
-      );
-      DeviceEventEmitter.addListener(
-        "newNotificationError",
-        this.handleNewNotificationError.bind(this)
-      );
-      this.mdsEmitter = true;
-    } else {
-      this.scanSubscription = mdsEmitter.addListener(
-        "newScannedDevice",
-        this.handleNewScannedDevice.bind(this)
-      );
-      this.newNotificationSubscription = mdsEmitter.addListener(
-        "newNotification",
-        this.handleNewNotification.bind(this)
-      );
-      this.newNotificationErrorSubscription = mdsEmitter.addListener(
-        "newNotificationError",
-        this.handleNewNotificationError.bind(this)
-      );
-      this.mdsEmitter = mdsEmitter;
-    }
+
+    this.scanSubscription = mdsEmitter.addListener(
+      "newScannedDevice",
+      this.handleNewScannedDevice.bind(this)
+    );
+    this.newNotificationSubscription = mdsEmitter.addListener(
+      "newNotification",
+      this.handleNewNotification.bind(this)
+    );
+    this.newNotificationErrorSubscription = mdsEmitter.addListener(
+      "newNotificationError",
+      this.handleNewNotificationError.bind(this)
+    );
+    this.mdsEmitter = mdsEmitter;
+    //}
   }
 
   subscribeToConnectedDevices() {
@@ -123,8 +109,13 @@ class MDSImpl {
       (notification) => {
         // console.log("connectedDevices", notification);
         const data = JSON.parse(notification) as Response;
-        const address = data["Body"]["Connection"]?.["UUID"];
-        if (data["Method"] == "POST") {
+        console.log("connectedDevice", data);
+
+        if (data["Method"] === "POST") {
+          const address =
+            Platform.OS === "ios"
+              ? data["Body"]["Connection"]?.["UUID"]
+              : data.Body.DeviceInfo.addressInfo[0].address;
           if (data.hasOwnProperty("Body")) {
             if (data["Body"].hasOwnProperty("DeviceInfo")) {
               if (data["Body"]["DeviceInfo"].hasOwnProperty("Serial")) {
@@ -138,7 +129,7 @@ class MDSImpl {
               this.onDeviceConnected?.(serial, address);
             }
           }
-        } else if (data["Method"] == "DEL") {
+        } else if (data["Method"] === "DEL") {
           if (data["Body"].hasOwnProperty("Serial")) {
             this.connectedDevice = undefined;
             this.onDeviceDisconnected?.(data["Body"]["Serial"], address);
@@ -213,128 +204,50 @@ class MDSImpl {
     ReactMds.disconnect(address);
   }
 
-  get(
-    serial: string,
-    uri: string,
-    contract: Record<string, unknown>,
-    responseCb,
-    errorCb
-  ) {
-    if (
-      serial == undefined ||
-      uri == undefined ||
-      contract == undefined ||
-      responseCb == undefined ||
-      errorCb == undefined
-    ) {
-      console.log("MDS get() missing argument(s).");
-      return false;
-    }
+  get(serial: string, uri: string, contract: Record<string, unknown>) {
     if (Platform.OS === "android") {
-      ReactMds.get(
-        URI_PREFIX + serial + uri,
-        JSON.stringify(contract),
-        responseCb,
-        errorCb
-      );
+      return ReactMds.get(URI_PREFIX + serial + uri, JSON.stringify(contract));
     } else {
-      ReactMds.get(
-        URI_PREFIX + serial + uri,
-        contract,
-        (err, r) => responseCb(r),
-        (err, r) => errorCb(r)
-      );
+      return ReactMds.get(URI_PREFIX + serial + uri, contract);
     }
-    return true;
   }
 
   put(
     serial: string,
     uri: string,
-    contract: Record<string, unknown>,
-    responseCb,
-    errorCb
-  ) {
-    if (
-      serial == undefined ||
-      uri == undefined ||
-      contract == undefined ||
-      responseCb == undefined ||
-      errorCb == undefined
-    ) {
-      console.log("MDS put() missing argument(s).");
-      return false;
-    }
-
+    contract: Record<string, unknown>
+  ): Promise<string> {
     if (Platform.OS === "android") {
-      ReactMds.put(
-        URI_PREFIX + serial + uri,
-        JSON.stringify(contract),
-        (err, r) => responseCb(r),
-        (err, r) => errorCb(r)
-      );
+      return ReactMds.put(URI_PREFIX + serial + uri, JSON.stringify(contract));
     } else {
-      ReactMds.put(URI_PREFIX + serial + uri, contract, responseCb, errorCb);
+      return ReactMds.put(URI_PREFIX + serial + uri, contract);
     }
   }
 
   post(
     serial: string,
     uri: string,
-    contract: Record<string, unknown>,
-    responseCb,
-    errorCb
-  ) {
-    if (
-      serial == undefined ||
-      uri == undefined ||
-      contract == undefined ||
-      responseCb == undefined ||
-      errorCb == undefined
-    ) {
-      console.log("MDS post() missing argument(s).");
-      return false;
-    }
-
+    contract: Record<string, unknown>
+  ): Promise<string> {
     if (Platform.OS === "android") {
-      ReactMds.post(
-        URI_PREFIX + serial + uri,
-        JSON.stringify(contract),
-        responseCb,
-        errorCb
-      );
+      return ReactMds.post(URI_PREFIX + serial + uri, JSON.stringify(contract));
     } else {
-      ReactMds.post(URI_PREFIX + serial + uri, contract, responseCb, errorCb);
+      return ReactMds.post(URI_PREFIX + serial + uri, contract);
     }
   }
 
   delete(
     serial: string,
     uri: string,
-    contract: Record<string, unknown>,
-    responseCb,
-    errorCb
-  ) {
-    if (
-      serial == undefined ||
-      uri == undefined ||
-      contract == undefined ||
-      responseCb == undefined ||
-      errorCb == undefined
-    ) {
-      console.log("MDS delete() missing argument(s).");
-      return false;
-    }
-
+    contract: Record<string, unknown>
+  ): Promise<string> {
     if (Platform.OS === "android") {
-      ReactMds.delete(
+      return ReactMds.delete(
         URI_PREFIX + serial + uri,
-        JSON.stringify(contract),
-        responseCb,
-        errorCb
+        JSON.stringify(contract)
       );
     } else {
-      ReactMds.delete(URI_PREFIX + serial + uri, contract, responseCb, errorCb);
+      return ReactMds.delete(URI_PREFIX + serial + uri, contract);
     }
   }
 
@@ -342,21 +255,9 @@ class MDSImpl {
     serial: string,
     uri: string,
     contract: Record<string, unknown>,
-    responseCb,
-    errorCb
+    responseCb: (response: string) => void,
+    errorCb: (error: Error) => void
   ) {
-    console.log("SUBSCRIBE JS SIDE");
-    if (
-      serial == undefined ||
-      uri == undefined ||
-      contract == undefined ||
-      responseCb == undefined ||
-      errorCb == undefined
-    ) {
-      console.log("MDS subscribe() missing argument(s).");
-      return undefined;
-    }
-
     this.subsKey++;
     const subsKeyStr = this.subsKey.toString();
     this.callbacks[subsKeyStr] = {
@@ -383,18 +284,24 @@ class MDSImpl {
   }
 
   unsubscribe(key: string) {
-    const uri = this.callbacks[key].uri;
-    delete this.callbacks[key];
+    if (Platform.OS === "ios") {
+      const uri = this.callbacks[key].uri;
+      delete this.callbacks[key];
 
-    const stillHasCallbacks = Object.values(this.callbacks).some((k) => {
-      return k.uri === uri;
-    });
+      const stillHasCallbacks = Object.values(this.callbacks).some((k) => {
+        return k.uri === uri;
+      });
 
-    if (!stillHasCallbacks) {
+      if (!stillHasCallbacks) {
+        ReactMds.unsubscribe(uri);
+      }
+
+      return true;
+    } else {
       ReactMds.unsubscribe(key);
+      delete this.callbacks[key];
+      return true;
     }
-
-    return true;
   }
 }
 

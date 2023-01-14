@@ -168,6 +168,10 @@ android {
         }
     }
 
+    packagingOptions {
+        pickFirst '**/libc++_shared.so'
+    }
+
     if (isNewArchitectureEnabled()) {
         // We configure the CMake build only if you decide to opt-in for the New Architecture.
         externalNativeBuild {

@@ -24,28 +24,6 @@ export async function setValueAsync(value: string) {
 
 const emitter = new EventEmitter(ExpoMdsModule ?? NativeModulesProxy.ExpoMds);
 
-export const scan = MDSImpl.scan;
-
-export const stopScan = MDSImpl.stopScan;
-
-export const setHandlers = MDSImpl.setHandlers;
-
-export const connect = MDSImpl.connect;
-
-export const disconnect = MDSImpl.disconnect;
-
-export const get = MDSImpl.get;
-
-export const put = MDSImpl.put;
-
-export const post = MDSImpl.post;
-
-export const deleteCall = MDSImpl.delete;
-
-export const subscribe = MDSImpl.subscribe;
-
-export const unsubscribe = MDSImpl.unsubscribe;
-
 export function addChangeListener(
   listener: (event: ChangeEventPayload) => void
 ): Subscription {
