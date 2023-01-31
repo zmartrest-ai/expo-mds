@@ -42,6 +42,8 @@ allprojects {
     }
 
     repositories {
+        // flatDir { dirs "$rootDir/../node_modules/expo-mds/android/src/main/libs" } 
+        flatDir { dirs "$rootDir/../../android" } 
         mavenLocal()
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
