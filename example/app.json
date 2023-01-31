@@ -31,6 +31,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "plugins": [
+      "../app.plugin.js"
+    ],
     "extra": {
       "eas": {
         "projectId": "da16dc39-111b-4658-b27e-16e70234d44d"
