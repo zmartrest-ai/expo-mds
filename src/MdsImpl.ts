@@ -107,9 +107,7 @@ class MDSImpl {
       "MDS/ConnectedDevices",
       {},
       (notification) => {
-        // console.log("connectedDevices", notification);
         const data = JSON.parse(notification) as Response;
-        console.log("connectedDevice", data);
 
         if (data["Method"] === "POST") {
           const address =
@@ -139,7 +137,7 @@ class MDSImpl {
         }
       },
       (error) => {
-        console.log("MDS subscribe error", error);
+        console.error("MDS subscribe error", error);
         if (this.connectedDevicesSubscription) {
           this.unsubscribe(this.connectedDevicesSubscription);
         }
@@ -149,18 +147,15 @@ class MDSImpl {
   }
 
   handleNewScannedDevice(e: Event & { name: string; address: string }) {
-    console.log("handleNewScannedDevice", e);
-    console.log("callback to call", this.onNewScannedDevice);
     this.onNewScannedDevice?.(e.name, e.address);
   }
 
   handleNewNotification(e: Event & { notification: string; key: string }) {
-    console.log("handleNewNotification", e);
     this.callbacks[e.key]?.success?.(e.notification);
   }
 
   handleNewNotificationError(e: Event & { error: Error; key: string }) {
-    console.log("handleNewNotificationError", e);
+    console.error("handleNewNotificationError", e);
     this.callbacks[e.key]?.error?.(e.error);
   }
 
