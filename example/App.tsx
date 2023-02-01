@@ -201,9 +201,13 @@ const App = () => {
             title="Disconnect"
             onPress={() => {
               console.log("disconnect", deviceConnected);
-              const address = deviceConnected.address.replace(/-/g, ":");
-              console.log("address", address);
-              MDS.disconnect(address);
+              if (deviceConnected) {
+                const address = deviceConnected?.address?.replace(/-/g, ":");
+                if (address) {
+                  console.log("address", address);
+                  MDS.disconnect(address);
+                }
+              }
             }}
           />
         ) : (

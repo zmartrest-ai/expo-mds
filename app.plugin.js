@@ -4,6 +4,7 @@ const {
   withAppBuildGradle,
   withDangerousMod,
   withPlugins,
+  withAndroidManifest,
   createRunOncePlugin,
 } = require("@expo/config-plugins");
 const fs = require("fs");
@@ -80,6 +81,24 @@ function withPodfile(config) {
   ]);
 }
 
+const configureAndroidPermissions = (config) => {
+  return withAndroidManifest(config, (config) => {
+    config.modResults.manifest["uses-permission"] = [
+      ...config.modResults.manifest["uses-permission"],
+      { $: { "android:name": "android.permission.BLUETOOTH" } },
+      { $: { "android:name": "android.permission.BLUETOOTH_ADMIN" } },
+      { $: { "android:name": "android.permission.BLUETOOTH_SCAN" } },
+      { $: { "android:name": "android.permission.ACCESS_COARSE_LOCATION" } },
+      { $: { "android:name": "android.permission.ACCESS_FINE_LOCATION" } },
+      {
+        $: { "android:name": "android.permission.ACCESS_BACKGROUND_LOCATION" },
+      },
+    ];
+
+    return config;
+  });
+};
+
 const pkg = require("./package.json");
 
 /** @type {import('@expo/config-plugins').ConfigPlugin} */
@@ -88,6 +107,7 @@ const mdsPlugins = (config) => {
     withPodfile,
     configureAppBuildGradle,
     configureProjectBuildGradle,
+    configureAndroidPermissions,
   ]);
 };
 

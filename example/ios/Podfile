@@ -31,7 +31,7 @@ target 'expomdsexample' do
   )
 
   # should be config plugin
-  pod 'Movesense', :git => 'ssh://git@altssh.bitbucket.org:443/movesense/movesense-mobile-lib.git'
+  pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib.git'
 
   post_install do |installer|
     react_native_post_install(
