@@ -10,7 +10,7 @@
 
 #import "MDS.h"
 #import "CoreBluetooth/CoreBluetooth.h"
-#import "RCTBridgeModule.h"
-#import "RCTEventEmitter.h"
+#import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 
 #endif /* RNMds_Bridging_Header_h */
