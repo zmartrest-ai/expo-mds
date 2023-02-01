@@ -41,15 +41,12 @@ const configureAppBuildGradle = (cfg) =>
       modResults: { contents },
     } = config;
 
+    const replaceWith = `android {\n    packagingOptions {\n      pickFirst '**/libc++_shared.so'\n      jniLibs.useLegacyPackaging = true\n    }\n\n`;
+
     // make it work so it replaces repositories under allprojects instead of buildscript
-    const updated = contents.includes(
-      ` packagingOptions { pickFirst '**/libc++_shared.so' }`
-    )
+    const updated = contents.includes(replaceWith)
       ? contents
-      : contents.replace(
-          /android\W?{/,
-          `android {\npackagingOptions { pickFirst '**/libc++_shared.so' }\n\n`
-        );
+      : contents.replace(/android\W?{/, replaceWith);
 
     config.modResults.contents = updated;
 
