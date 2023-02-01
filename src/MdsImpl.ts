@@ -108,13 +108,12 @@ class MDSImpl {
       {},
       (notification) => {
         const data = JSON.parse(notification) as Response;
-
+        const address =
+          Platform.OS === "ios"
+            ? data["Body"]["Connection"]?.["UUID"]
+            : // @ts-expect-error room for improvement
+              data.Body.DeviceInfo.addressInfo[0].address;
         if (data["Method"] === "POST") {
-          const address =
-            Platform.OS === "ios"
-              ? data["Body"]["Connection"]?.["UUID"]
-              : // @ts-expect-error room for improvement
-                data.Body.DeviceInfo.addressInfo[0].address;
           if (data.hasOwnProperty("Body")) {
             if (data["Body"].hasOwnProperty("DeviceInfo")) {
               if (data["Body"]["DeviceInfo"].hasOwnProperty("Serial")) {
@@ -131,7 +130,6 @@ class MDSImpl {
         } else if (data["Method"] === "DEL") {
           if (data["Body"].hasOwnProperty("Serial")) {
             this.connectedDevice = undefined;
-            // @ts-expect-error room for improvement
             this.onDeviceDisconnected?.(data["Body"]["Serial"], address);
           }
         }
