@@ -89,5 +89,5 @@ dependencies {
   implementation project(':expo-modules-core')
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${getKotlinVersion()}"
   implementation "com.polidea.rxandroidble2:rxandroidble:1.11.1"
-  implementation(name: 'mdslib-1.68.0-release', ext: 'aar')
+  implementation files('./mdslib-1.68.0-release.aar')
 }
