@@ -2,6 +2,8 @@
 
 Expo Module for Movesense
 
+Please note that you need hermes as js engine for this lib to work on Android
+
 # API documentation
 
 - [Documentation for the main branch](https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/mds.md)
