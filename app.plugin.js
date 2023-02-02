@@ -78,6 +78,30 @@ function withPodfile(config) {
   ]);
 }
 
+/** @type {import('@expo/config-plugins').ConfigPlugin} */
+function withCopyMdsAARfile(config) {
+  return withDangerousMod(config, [
+    "android",
+    async (config) => {
+      // Copy mds lib to android folder
+      const src = path.join(
+        config.modRequest.platformProjectRoot,
+        '../node_modules/expo-mds/android/mdslib-1.68.0-release.aar'
+      )
+      const libs = path.join(
+        config.modRequest.platformProjectRoot,
+        'libs'
+      )
+      const dest = path.join(libs, 'mdslib-1.68.0-release.aar')
+
+      fs.mkdirSync(libs)
+      fs.copyFileSync(src, dest)
+
+      return config;
+    },
+  ]);
+}
+
 const configureAndroidPermissions = (config) => {
   return withAndroidManifest(config, (config) => {
     config.modResults.manifest["uses-permission"] = [
@@ -102,6 +126,7 @@ const pkg = require("./package.json");
 const mdsPlugins = (config) => {
   return withPlugins(config, [
     withPodfile,
+    withCopyMdsAARfile,
     configureAppBuildGradle,
     configureProjectBuildGradle,
     configureAndroidPermissions,
