@@ -21,13 +21,13 @@
     "expo-mds",
     "ExpoMds"
   ],
-  "repository": "https://github.com/robertherber/expo-mds",
+  "repository": "https://github.com/zmartrest-ai/expo-mds",
   "bugs": {
-    "url": "https://github.com/robertherber/expo-mds/issues"
+    "url": "https://github.com/zmartrest-ai/expo-mds/issues"
   },
   "author": "robertherber <robert@kingstinct.com> (https://github.com/robertherber)",
   "license": "MIT",
-  "homepage": "https://github.com/robertherber/expo-mds#readme",
+  "homepage": "https://github.com/zmartrest-ai/expo-mds#readme",
   "dependencies": {},
   "devDependencies": {
     "@types/react": "^18.0.25",
