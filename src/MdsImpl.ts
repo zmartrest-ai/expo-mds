@@ -7,11 +7,12 @@ const URI_PREFIX = "suunto://";
 
 type OnDeviceConnected = (serial: string, address: string) => void;
 type OnDeviceDiscovered = (name: string, address: string) => void;
+type OnDeviceDisconnected = (serial: string) => void;
 
 const mdsEmitter = new EventEmitter(ReactMds);
-
+// {"Response": {"Status": 200}, "Body": {"Serial": "213330002095"}, "Uri": "suunto://MDS/ConnectedDevices", "Method": "DEL"}
 interface Response {
-  Body: ConnectionBody | HRBody;
+  Body: ConnectionBody | DisconnectBody | HRBody;
   Method: "POST" | "GET" | "PUT" | "DEL";
   Uri: string;
   Response?: {
@@ -28,6 +29,10 @@ interface HRBody {
 interface ConnectionBody {
   Connection: Connection;
   DeviceInfo: DeviceInfo;
+  Serial: string;
+}
+
+interface DisconnectBody {
   Serial: string;
 }
 
@@ -71,7 +76,7 @@ class MDSImpl {
   subscribedToConnectedDevices: boolean;
   connectedDevicesSubscription: string | undefined;
   onDeviceConnected: OnDeviceConnected | undefined;
-  onDeviceDisconnected: OnDeviceConnected | undefined;
+  onDeviceDisconnected: OnDeviceDisconnected | undefined;
   onNewScannedDevice: OnDeviceDiscovered | undefined;
   scanSubscription: Subscription | undefined;
   newNotificationSubscription: Subscription | undefined;
@@ -112,7 +117,8 @@ class MDSImpl {
           Platform.OS === "ios"
             ? data["Body"]["Connection"]?.["UUID"]
             : // @ts-expect-error room for improvement
-              data.Body.DeviceInfo.addressInfo[0].address;
+              data.Body.DeviceInfo?.addressInfo[0]?.address;
+
         if (data["Method"] === "POST") {
           if (data.hasOwnProperty("Body")) {
             if (data["Body"].hasOwnProperty("DeviceInfo")) {
@@ -130,7 +136,7 @@ class MDSImpl {
         } else if (data["Method"] === "DEL") {
           if (data["Body"].hasOwnProperty("Serial")) {
             this.connectedDevice = undefined;
-            this.onDeviceDisconnected?.(data["Body"]["Serial"], address);
+            this.onDeviceDisconnected?.(data["Body"]["Serial"]);
           }
         }
       },
@@ -175,7 +181,7 @@ class MDSImpl {
 
   setHandlers(
     deviceConnected: OnDeviceConnected,
-    deviceDisconnected: OnDeviceConnected
+    deviceDisconnected: OnDeviceDisconnected
   ) {
     this.onDeviceConnected = deviceConnected;
     if (this.connectedDevice) {
