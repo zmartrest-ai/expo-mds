@@ -86,16 +86,13 @@ function withCopyMdsAARfile(config) {
       // Copy mds lib to android folder
       const src = path.join(
         config.modRequest.platformProjectRoot,
-        '../node_modules/expo-mds/android/mdslib-1.68.0-release.aar'
-      )
-      const libs = path.join(
-        config.modRequest.platformProjectRoot,
-        'libs'
-      )
-      const dest = path.join(libs, 'mdslib-1.68.0-release.aar')
+        "../node_modules/expo-mds/android/mdslib-1.68.0-release.aar"
+      );
+      const libs = path.join(config.modRequest.platformProjectRoot, "libs");
+      const dest = path.join(libs, "mdslib-1.68.0-release.aar");
 
-      fs.mkdirSync(libs)
-      fs.copyFileSync(src, dest)
+      fs.mkdirSync(libs);
+      fs.copyFileSync(src, dest);
 
       return config;
     },
@@ -111,6 +108,7 @@ const configureAndroidPermissions = (config) => {
       { $: { "android:name": "android.permission.BLUETOOTH_SCAN" } },
       { $: { "android:name": "android.permission.ACCESS_COARSE_LOCATION" } },
       { $: { "android:name": "android.permission.ACCESS_FINE_LOCATION" } },
+      { $: { "android:name": "android.permission.BLUETOOTH_CONNECT" } },
       {
         $: { "android:name": "android.permission.ACCESS_BACKGROUND_LOCATION" },
       },
