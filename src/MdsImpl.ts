@@ -63,8 +63,8 @@ interface Connection {
 }
 
 class MDSImpl {
-  subsKey: number;
-  callbacks: Record<
+  #subsKey: number;
+  #callbacks: Record<
     string,
     {
       success: (notification: string) => void;
@@ -72,42 +72,42 @@ class MDSImpl {
       uri: string;
     }
   >;
-  mdsEmitter: null | EventEmitter | boolean;
-  subscribedToConnectedDevices: boolean;
-  connectedDevicesSubscription: string | undefined;
-  onDeviceConnected: OnDeviceConnected | undefined;
-  onDeviceDisconnected: OnDeviceDisconnected | undefined;
-  onNewScannedDevice: OnDeviceDiscovered | undefined;
-  scanSubscription: Subscription | undefined;
-  newNotificationSubscription: Subscription | undefined;
-  newNotificationErrorSubscription: Subscription | undefined;
+  #mdsEmitter: null | EventEmitter | boolean;
+  #subscribedToConnectedDevices: boolean;
+  #connectedDevicesSubscription: string | undefined;
+  #onDeviceConnected: OnDeviceConnected | undefined;
+  #onDeviceDisconnected: OnDeviceDisconnected | undefined;
+  #onNewScannedDevice: OnDeviceDiscovered | undefined;
+  #scanSubscription: Subscription | undefined;
+  #newNotificationSubscription: Subscription | undefined;
+  #newNotificationErrorSubscription: Subscription | undefined;
 
   constructor() {
-    this.subsKey = 0;
-    this.callbacks = {};
-    this.mdsEmitter = null;
-    this.subscribedToConnectedDevices = false;
-    this.connectedDevicesSubscription = undefined;
+    this.#subsKey = 0;
+    this.#callbacks = {};
+    this.#mdsEmitter = null;
+    this.#subscribedToConnectedDevices = false;
+    this.#connectedDevicesSubscription = undefined;
 
-    this.scanSubscription = mdsEmitter.addListener(
+    this.#scanSubscription = mdsEmitter.addListener(
       "newScannedDevice",
-      this.handleNewScannedDevice.bind(this)
+      this.#handleNewScannedDevice.bind(this)
     );
-    this.newNotificationSubscription = mdsEmitter.addListener(
+    this.#newNotificationSubscription = mdsEmitter.addListener(
       "newNotification",
-      this.handleNewNotification.bind(this)
+      this.#handleNewNotification.bind(this)
     );
-    this.newNotificationErrorSubscription = mdsEmitter.addListener(
+    this.#newNotificationErrorSubscription = mdsEmitter.addListener(
       "newNotificationError",
-      this.handleNewNotificationError.bind(this)
+      this.#handleNewNotificationError.bind(this)
     );
-    this.mdsEmitter = mdsEmitter;
+    this.#mdsEmitter = mdsEmitter;
     //}
   }
 
-  subscribeToConnectedDevices() {
-    this.subscribedToConnectedDevices = true;
-    this.connectedDevicesSubscription = this.subscribe(
+  #subscribeToConnectedDevices() {
+    this.#subscribedToConnectedDevices = true;
+    this.#connectedDevicesSubscription = this.subscribe(
       "",
       "MDS/ConnectedDevices",
       {},
@@ -124,47 +124,47 @@ class MDSImpl {
             if (data["Body"].hasOwnProperty("DeviceInfo")) {
               if (data["Body"]["DeviceInfo"].hasOwnProperty("Serial")) {
                 const serial = data["Body"]["DeviceInfo"]["Serial"];
-                this.connectedDevice = { serial, address };
-                this.onDeviceConnected?.(serial, address);
+                this.#connectedDevice = { serial, address };
+                this.#onDeviceConnected?.(serial, address);
               }
             } else if (data["Body"].hasOwnProperty("Serial")) {
               const serial = data["Body"]["Serial"];
-              this.connectedDevice = { serial, address };
-              this.onDeviceConnected?.(serial, address);
+              this.#connectedDevice = { serial, address };
+              this.#onDeviceConnected?.(serial, address);
             }
           }
         } else if (data["Method"] === "DEL") {
           if (data["Body"].hasOwnProperty("Serial")) {
-            this.connectedDevice = undefined;
-            this.onDeviceDisconnected?.(data["Body"]["Serial"]);
+            this.#connectedDevice = undefined;
+            this.#onDeviceDisconnected?.(data["Body"]["Serial"]);
           }
         }
       },
       (error) => {
         console.error("MDS subscribe error", error);
-        if (this.connectedDevicesSubscription) {
-          this.unsubscribe(this.connectedDevicesSubscription);
+        if (this.#connectedDevicesSubscription) {
+          this.unsubscribe(this.#connectedDevicesSubscription);
         }
-        this.subscribedToConnectedDevices = false;
+        this.#subscribedToConnectedDevices = false;
       }
     );
   }
 
-  handleNewScannedDevice(e: Event & { name: string; address: string }) {
-    this.onNewScannedDevice?.(e.name, e.address);
+  #handleNewScannedDevice(e: Event & { name: string; address: string }) {
+    this.#onNewScannedDevice?.(e.name, e.address);
   }
 
-  handleNewNotification(e: Event & { notification: string; key: string }) {
-    this.callbacks[e.key]?.success?.(e.notification);
+  #handleNewNotification(e: Event & { notification: string; key: string }) {
+    this.#callbacks[e.key]?.success?.(e.notification);
   }
 
-  handleNewNotificationError(e: Event & { error: Error; key: string }) {
+  #handleNewNotificationError(e: Event & { error: Error; key: string }) {
     console.error("handleNewNotificationError", e);
-    this.callbacks[e.key]?.error?.(e.error);
+    this.#callbacks[e.key]?.error?.(e.error);
   }
 
   scan(scanHandler: OnDeviceDiscovered) {
-    this.onNewScannedDevice = scanHandler;
+    this.#onNewScannedDevice = scanHandler;
     ReactMds.scan();
   }
 
@@ -172,7 +172,7 @@ class MDSImpl {
     ReactMds.stopScan();
   }
 
-  connectedDevice:
+  #connectedDevice:
     | {
         serial: string;
         address: string;
@@ -183,17 +183,17 @@ class MDSImpl {
     deviceConnected: OnDeviceConnected,
     deviceDisconnected: OnDeviceDisconnected
   ) {
-    this.onDeviceConnected = deviceConnected;
-    if (this.connectedDevice) {
+    this.#onDeviceConnected = deviceConnected;
+    if (this.#connectedDevice) {
       deviceConnected(
-        this.connectedDevice.serial,
-        this.connectedDevice.address
+        this.#connectedDevice.serial,
+        this.#connectedDevice.address
       );
     }
-    this.onDeviceDisconnected = deviceDisconnected;
-    if (!this.subscribedToConnectedDevices) {
-      this.subscribedToConnectedDevices = true;
-      this.subscribeToConnectedDevices();
+    this.#onDeviceDisconnected = deviceDisconnected;
+    if (!this.#subscribedToConnectedDevices) {
+      this.#subscribedToConnectedDevices = true;
+      this.#subscribeToConnectedDevices();
     }
   }
 
@@ -259,9 +259,9 @@ class MDSImpl {
     responseCb: (response: string) => void,
     errorCb: (error: Error) => void
   ) {
-    this.subsKey++;
-    const subsKeyStr = this.subsKey.toString();
-    this.callbacks[subsKeyStr] = {
+    this.#subsKey++;
+    const subsKeyStr = this.#subsKey.toString();
+    this.#callbacks[subsKeyStr] = {
       success: responseCb,
       error: errorCb,
       uri,
@@ -286,10 +286,10 @@ class MDSImpl {
 
   unsubscribe(key: string) {
     if (Platform.OS === "ios") {
-      const uri = this.callbacks[key].uri;
-      delete this.callbacks[key];
+      const uri = this.#callbacks[key].uri;
+      delete this.#callbacks[key];
 
-      const stillHasCallbacks = Object.values(this.callbacks).some((k) => {
+      const stillHasCallbacks = Object.values(this.#callbacks).some((k) => {
         return k.uri === uri;
       });
 
@@ -300,7 +300,7 @@ class MDSImpl {
       return true;
     } else {
       ReactMds.unsubscribe(key);
-      delete this.callbacks[key];
+      delete this.#callbacks[key];
       return true;
     }
   }

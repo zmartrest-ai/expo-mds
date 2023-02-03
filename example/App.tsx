@@ -22,14 +22,14 @@ const App = () => {
   const [devices, setDevices] = useState<ScanDevice[]>([]);
   const connectingToDevice = useRef<ScanDevice | null>(null);
   const [scanning, setScanning] = useState<boolean>(false);
-  const [error, setError] = useState<string>(null);
+  const [error, setError] = useState<string>();
   const [deviceConnected, setDeviceConnected] =
     useState<ConnectedDevice | null>(null);
   const [lastSession, setLastSession] = useState<{
     liveSince?: string;
     liveLast?: string;
     dataPoints: number;
-    error: string;
+    error?: string;
   }>();
 
   useEffect(() => {
