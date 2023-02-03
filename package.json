@@ -1,6 +1,6 @@
 {
   "name": "expo-mds",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Expo Module for Movesense",
   "main": "build/index.js",
   "types": "build/index.d.ts",
