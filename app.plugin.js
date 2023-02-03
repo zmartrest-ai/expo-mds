@@ -91,8 +91,10 @@ function withCopyMdsAARfile(config) {
       const libs = path.join(config.modRequest.platformProjectRoot, "libs");
       const dest = path.join(libs, "mdslib-1.68.0-release.aar");
 
-      fs.mkdirSync(libs);
-      fs.copyFileSync(src, dest);
+      if (!fs.existsSync(dest)) {
+        fs.mkdirSync(libs);
+        fs.copyFileSync(src, dest);
+      }
 
       return config;
     },
