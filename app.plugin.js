@@ -18,37 +18,17 @@ const configureProjectBuildGradle = (cfg) =>
     } = config;
 
     const [before, after] = contents.split("allprojects");
-
+    const flatDir =
+      'flatDir { dirs "$rootDir/../node_modules/expo-mds/android" }';
     // make it work so it replaces repositories under allprojects instead of buildscript
-    const newAfter = after.includes(
-      'flatDir { dirs "$rootDir/../node_modules/expo-mds/android" }'
-    )
+    const newAfter = after.includes(flatDir)
       ? after
       : after.replace(
           /repositories\W?{/,
-          'repositories {\n        flatDir { dirs "$rootDir/../node_modules/expo-mds/android" }\n'
+          `repositories {\n        ${flatDir}\n`
         );
 
     config.modResults.contents = before + "allprojects" + newAfter;
-
-    return config;
-  });
-
-/** @type {import('@expo/config-plugins').ConfigPlugin} */
-const configureAppBuildGradle = (cfg) =>
-  withAppBuildGradle(cfg, (config) => {
-    const {
-      modResults: { contents },
-    } = config;
-
-    const replaceWith = `android {\n    packagingOptions {\n      pickFirst '**/libc++_shared.so'\n      }\n\n`;
-
-    // make it work so it replaces repositories under allprojects instead of buildscript
-    const updated = contents.includes(replaceWith)
-      ? contents
-      : contents.replace(/android\W?{/, replaceWith);
-
-    config.modResults.contents = updated;
 
     return config;
   });
@@ -78,6 +58,7 @@ function withPodfile(config) {
   ]);
 }
 
+// modified mdslib to remove libc++_shared as described here: https://stefanmajiros.medium.com/how-to-integrate-zoom-sdk-into-react-native-47492d4e46a6
 /** @type {import('@expo/config-plugins').ConfigPlugin} */
 function withCopyMdsAARfile(config) {
   return withDangerousMod(config, [
@@ -86,10 +67,10 @@ function withCopyMdsAARfile(config) {
       // Copy mds lib to android folder
       const src = path.join(
         config.modRequest.platformProjectRoot,
-        "../node_modules/expo-mds/android/mdslib-1.68.0-release.aar"
+        "../node_modules/expo-mds/android/mdslib-1.68.0-without-libc++_shared.aar"
       );
       const libs = path.join(config.modRequest.platformProjectRoot, "libs");
-      const dest = path.join(libs, "mdslib-1.68.0-release.aar");
+      const dest = path.join(libs, "mdslib-1.68.0-without-libc++_shared.aar");
 
       if (!fs.existsSync(dest)) {
         fs.mkdirSync(libs);
@@ -127,7 +108,6 @@ const mdsPlugins = (config) => {
   return withPlugins(config, [
     withPodfile,
     withCopyMdsAARfile,
-    configureAppBuildGradle,
     configureProjectBuildGradle,
     configureAndroidPermissions,
   ]);
