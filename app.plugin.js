@@ -1,7 +1,6 @@
 /** @type {import('@expo/config-plugins')} */
 const {
   withProjectBuildGradle,
-  withAppBuildGradle,
   withDangerousMod,
   withPlugins,
   withAndroidManifest,
