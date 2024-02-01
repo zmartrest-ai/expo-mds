@@ -1,7 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import MDS from "expo-mds";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  AsyncStorage,
   Button,
   SafeAreaView,
   ScrollView,

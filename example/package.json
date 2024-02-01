@@ -5,22 +5,23 @@
     "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "prebuild": "MDS_LIB_PATH=../android/libs/mdslib-1.68.0-without-libc++_shared.aar expo prebuild"
   },
   "dependencies": {
-    "expo": "~47.0.12",
-    "react": "18.1.0",
-    "react-dom": "18.1.0",
-    "react-native": "0.70.5",
-    "react-native-web": "~0.18.9",
-    "expo-intent-launcher": "~10.3.1"
+    "expo": "^50.0.4",
+    "expo-intent-launcher": "~10.11.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.73.2",
+    "react-native-web": "~0.19.6",
+    "@react-native-async-storage/async-storage": "1.21.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/plugin-proposal-private-methods": "^7.18.6",
-    "@types/react": "~18.0.14",
-    "@types/react-native": "~0.70.6",
-    "typescript": "^4.6.3"
+    "@types/react": "~18.2.45",
+    "typescript": "^5.3.0"
   },
   "private": true,
   "expo": {

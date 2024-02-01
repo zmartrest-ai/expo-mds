@@ -60,14 +60,20 @@ function withPodfile(config) {
 // modified mdslib to remove libc++_shared as described here: https://stefanmajiros.medium.com/how-to-integrate-zoom-sdk-into-react-native-47492d4e46a6
 /** @type {import('@expo/config-plugins').ConfigPlugin} */
 function withCopyMdsAARfile(config) {
+  const mdsLibPath = process.env.MDS_LIB_PATH;
   return withDangerousMod(config, [
     "android",
     async (config) => {
       // Copy mds lib to android folder
-      const src = path.join(
-        config.modRequest.platformProjectRoot,
-        "../node_modules/expo-mds/android/mdslib-1.68.0-without-libc++_shared.aar"
-      );
+      const src =
+        mdsLibPath ??
+        path.join(
+          config.modRequest.platformProjectRoot,
+          "../node_modules/expo-mds/android/mdslib-1.68.0-without-libc++_shared.aar"
+        );
+      if (!fs.existsSync(src)) {
+        throw Error(`The mds lib (${path.resolve(src)}) does not exist.`);
+      }
       const libs = path.join(config.modRequest.platformProjectRoot, "libs");
       const dest = path.join(libs, "mdslib-1.68.0-without-libc++_shared.aar");
 
