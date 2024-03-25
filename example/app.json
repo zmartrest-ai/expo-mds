@@ -11,12 +11,18 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.mds.example"
+      "bundleIdentifier": "expo.modules.mds.example",
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "Use bluetooth to scan for sensor"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -27,6 +33,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "../app.plugin.js"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "da16dc39-111b-4658-b27e-16e70234d44d"
+      }
     }
   }
 }

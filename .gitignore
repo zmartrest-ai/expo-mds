@@ -36,8 +36,6 @@ project.xcworkspace
 .settings
 local.properties
 android.iml
-android/app/libs
-android/keystores/debug.keystore
 
 # Cocoapods
 #
@@ -53,5 +51,13 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
+# BUCK
+buck-out/
+\.buckd/
+android/app/libs
+android/keystores/debug.keystore
+
 # Expo
 .expo/*
+
+*.aab
