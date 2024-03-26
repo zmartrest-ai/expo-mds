@@ -1,6 +1,5 @@
 /** @type {import('@expo/config-plugins')} */
 const {
-  withProjectBuildGradle,
   withDangerousMod,
   withPlugins,
   withAndroidManifest,
@@ -8,29 +7,6 @@ const {
 } = require("@expo/config-plugins");
 const fs = require("fs");
 const path = require("path");
-
-/** @type {import('@expo/config-plugins').ConfigPlugin} */
-const configureProjectBuildGradle = (cfg) =>
-  withProjectBuildGradle(cfg, (config) => {
-    const {
-      modResults: { contents },
-    } = config;
-
-    const [before, after] = contents.split("allprojects");
-    const flatDir =
-      'flatDir { dirs "$rootDir/../node_modules/expo-mds/android" }';
-    // make it work so it replaces repositories under allprojects instead of buildscript
-    const newAfter = after.includes(flatDir)
-      ? after
-      : after.replace(
-          /repositories\W?{/,
-          `repositories {\n        ${flatDir}\n`
-        );
-
-    config.modResults.contents = before + "allprojects" + newAfter;
-
-    return config;
-  });
 
 /** @type {import('@expo/config-plugins').ConfigPlugin} */
 function withPodfile(config) {
@@ -64,10 +40,14 @@ function withCopyMdsAARfile(config) {
     "android",
     async (config) => {
       // Copy mds lib to android folder
-      const src = path.join(
-        config.modRequest.platformProjectRoot,
-        "../node_modules/expo-mds/android/libs/mdslib-3.15.0(1)-release.aar"
-      );
+      const mdsLibPath =
+        process.env.EXPO_PUBLIC_MDS_LIB_PATH ??
+        path.join(
+          config.modRequest.platformProjectRoot,
+          "../node_modules/expo-mds/android/libs/",
+        );
+      console.log("mdsLibPath", mdsLibPath);
+      const src = path.join(mdsLibPath, "mdslib-3.15.0(1)-release.aar");
       const libs = path.join(config.modRequest.platformProjectRoot, "libs");
       const dest = path.join(libs, "mdslib-3.15.0(1)-release.aar");
 
@@ -107,7 +87,6 @@ const mdsPlugins = (config) => {
   return withPlugins(config, [
     withPodfile,
     withCopyMdsAARfile,
-    configureProjectBuildGradle,
     configureAndroidPermissions,
   ]);
 };
