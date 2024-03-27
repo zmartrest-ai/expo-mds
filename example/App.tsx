@@ -9,6 +9,9 @@ import {
   Text,
   useColorScheme,
 } from "react-native";
+import { BleManager } from "react-native-ble-plx";
+
+const bleManager = new BleManager();
 
 type ScanDevice = { name: string; address: string };
 type ConnectedDevice = { name: string; address: string; serial: string };
@@ -65,9 +68,19 @@ const App = () => {
   const startScan = useCallback(() => {
     console.log("start scan");
     setScanning(true);
-    MDS.scan((name: string, address: string) => {
-      console.log("HELLO", { name, address });
-      if (name?.includes("Movesense")) {
+    bleManager.startDeviceScan(null, null, (error, device) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      if (device == null) return;
+
+      const { id: address, name } = device;
+      console.log("HELLO", name, address);
+
+      if (name != null && name.includes("Movesense")) {
+        console.log("Movesense device found", JSON.stringify(device, null, 2));
         setDevices((prev) => {
           if (prev.find((d) => d.address === address)) {
             return prev;
@@ -82,7 +95,7 @@ const App = () => {
     console.log("stop scan");
     setScanning(false);
     if (!scanning) {
-      MDS.stopScan();
+      bleManager.stopDeviceScan();
     }
   }, [scanning]);
 
