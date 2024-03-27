@@ -11,11 +11,6 @@ public class ExpoMdsModule: Module {
     // The module will be accessible from `requireNativeModule('ExpoMds')` in JavaScript.
     Name("ExpoMds")
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants([
-      "PI": Double.pi
-    ])
-
     // Defines event names that the module can send to JavaScript.
     Events("newScannedDevice", "newNotification", "newNotificationError")
 
@@ -103,23 +98,5 @@ public class ExpoMdsModule: Module {
                                                     "key": key])
           })
       }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { (value: String) in
-      // Send an event to JavaScript.
-      self.sendEvent("onChange", [
-        "value": value
-      ])
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of the
-    // view definition: Prop, Events.
-    View(ExpoMdsView.self) {
-      // Defines a setter for the `name` prop.
-      Prop("name") { (view: ExpoMdsView, prop: String) in
-        print(prop)
-      }
-    }
   }
 }
