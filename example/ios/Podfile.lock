@@ -11,8 +11,9 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (12.8.2):
     - ExpoModulesCore
-  - ExpoMds (0.1.0):
+  - ExpoMds (0.2.0):
     - ExpoModulesCore
+    - Movesense
   - ExpoModulesCore (1.11.12):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -34,6 +35,7 @@ PODS:
     - hermes-engine/Pre-built (= 0.73.6)
   - hermes-engine/Pre-built (0.73.6)
   - libevent (2.1.12)
+  - Movesense (3.15.0)
   - RCT-Folly (2022.05.16.00):
     - boost
     - DoubleConversion
@@ -1072,6 +1074,8 @@ PODS:
     - React-jsi (= 0.73.6)
     - React-logger (= 0.73.6)
     - React-perflogger (= 0.73.6)
+  - RNCAsyncStorage (1.21.0):
+    - React-Core
   - SocketRocket (0.6.1)
   - Yoga (1.14.0)
 
@@ -1090,6 +1094,7 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - libevent (~> 2.1.12)
+  - Movesense (from `https://bitbucket.org/movesense/movesense-mobile-lib.git`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
@@ -1133,6 +1138,7 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1169,6 +1175,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2024-02-20-RNv0.73.5-18f99ace4213052c5e7cdbcd39ee9766cd5df7e4
+  Movesense:
+    :git: https://bitbucket.org/movesense/movesense-mobile-lib.git
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTRequired:
@@ -1251,8 +1259,15 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNCAsyncStorage:
+    :path: "../node_modules/@react-native-async-storage/async-storage"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
+
+CHECKOUT OPTIONS:
+  Movesense:
+    :commit: c7cc4933823553d2ad3f67db458c507a633ab33d
+    :git: https://bitbucket.org/movesense/movesense-mobile-lib.git
 
 SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
@@ -1262,7 +1277,7 @@ SPEC CHECKSUMS:
   Expo: e01a77c6fa4bc80a6d1bb949cda1d12d21044abd
   ExpoFileSystem: eecaf6796aed0f4dd20042dc2ca2cac6c4bc1185
   ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c
-  ExpoMds: e61a4c3f86c413a116cb6e68a55cfc88003f4980
+  ExpoMds: e9362c51eb7f6bcf314d10bceb9b79921cbce5dc
   ExpoModulesCore: 61dc57c6e2a35f2f84baf488146db624e03af4cd
   FBLazyVector: f64d1e2ea739b4d8f7e4740cde18089cd97fe864
   FBReactNativeSpec: 9f2b8b243131565335437dba74923a8d3015e780
@@ -1270,6 +1285,7 @@ SPEC CHECKSUMS:
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
   hermes-engine: 9cecf9953a681df7556b8cc9c74905de8f3293c0
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
+  Movesense: a1068c58b31d8032a13d69d0cb35ba6c444d2aae
   RCT-Folly: 7169b2b1c44399c76a47b5deaaba715eeeb476c0
   RCTRequired: ca1d7414aba0b27efcfa2ccd37637edb1ab77d96
   RCTTypeSafety: 678e344fb976ff98343ca61dc62e151f3a042292
@@ -1311,9 +1327,10 @@ SPEC CHECKSUMS:
   React-runtimescheduler: 9636eee762c699ca7c85751a359101797e4c8b3b
   React-utils: d16c1d2251c088ad817996621947d0ac8167b46c
   ReactCommon: 2aa35648354bd4c4665b9a5084a7d37097b89c10
+  RNCAsyncStorage: 618d03a5f52fbccb3d7010076bc54712844c18ef
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
 
-PODFILE CHECKSUM: 9e2091b1a3e267a5149408e9bf299e5cec204926
+PODFILE CHECKSUM: db9d1efd9002b32e9c1c2de4dc61f32d6e403f57
 
 COCOAPODS: 1.14.3

@@ -53,7 +53,9 @@ target 'expomdsexample' do
     :flipper_configuration => flipper_config
   )
 
-  post_install do |installer|
+   pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib.git'
+
+ post_install do |installer|
     react_native_post_install(
       installer,
       config[:reactNativePath],
