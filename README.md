@@ -31,6 +31,24 @@ Run `npx pod-install` after installing the npm package.
 ### Configure for Android
 
 
+### Configure app.json
+
+```
+{
+  "expo": {
+    "ios": {
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "Use bluetooth to scan for sensor"
+      }
+      ...
+    },
+    "plugins": ["expo-mds"]
+    ...
+  }
+}
+```
+
+
 
 # Contributing
 
