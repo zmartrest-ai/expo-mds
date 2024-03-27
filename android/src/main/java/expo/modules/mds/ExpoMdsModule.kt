@@ -9,7 +9,6 @@ import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
 lateinit var mds: Mds
-lateinit var bleScanner: BleScanner
 var subscriptionMap = mutableMapOf<String, MdsSubscription>()
 
 class ExpoMdsModule : Module() {
@@ -94,16 +93,7 @@ class ExpoMdsModule : Module() {
 
     }
 
-    class BleListener: BleScanListener {
-      override fun onDeviceFound(name: String, address: String) {
-        sendEvent("newScannedDevice", hashMapOf(
-                "name" to name,
-                "address" to address
-        ))
-      }
-    }
-
-    Events("newScannedDevice", "newNotification", "newNotificationError")
+    Events("newNotification", "newNotificationError")
 
     fun initMds(): Mds{
       if(::mds.isInitialized){
@@ -112,25 +102,6 @@ class ExpoMdsModule : Module() {
       mds = Builder().build(appContext.reactContext);
       return mds;
     }
-
-    fun initBleScanner(): BleScanner {
-      if(::bleScanner.isInitialized){
-        bleScanner
-      }
-      bleScanner = BleScanner(appContext.reactContext, BleListener());
-      return bleScanner
-    }
-
-    Function("scan") {
-      bleScanner = initBleScanner();
-      bleScanner.scan()
-    }
-
-    Function("stopScan") {
-      bleScanner = initBleScanner();
-      bleScanner.stopScan()
-    }
-
 
     Function("unsubscribe") { key: String ->
       var cb = subscriptionMap.get(key)

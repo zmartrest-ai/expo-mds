@@ -12,21 +12,7 @@ public class ExpoMdsModule: Module {
     Name("ExpoMds")
 
     // Defines event names that the module can send to JavaScript.
-    Events("newScannedDevice", "newNotification", "newNotificationError")
-
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("scan") {
-        func handleScannedDevice(device: MovesenseDevice) {
-            let deviceSend = ["name": device.localName, "address": device.uuid.uuidString] as [String : Any]
-            self.sendEvent( "newScannedDevice", deviceSend )
-      
-        }
-        self.mds.startScan({device in handleScannedDevice(device: device)}, {})
-    }
-      
-      Function("stopScan") {
-          self.mds.stopScan()
-      }
+    Events("newNotification", "newNotificationError")
       
       Function("unsubscribe") { (uri: String) in
         self.mds.unsubscribe(uri)

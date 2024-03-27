@@ -9,7 +9,6 @@
 #define RNMds_Bridging_Header_h
 
 #import "MDS.h"
-#import "CoreBluetooth/CoreBluetooth.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 

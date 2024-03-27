@@ -8,12 +8,10 @@ final public class MdsService: NSObject {
     internal var mds : MDSWrapper!
     private var subscriptions = Dictionary<String, Bool>()
     private var devices = Dictionary<String, MovesenseDevice>()
-    private var bleController : BleController!
     
     public override init() {
         super.init()
         self.mds = MDSWrapper()
-        self.bleController = BleController()
     }
 
     deinit {
@@ -24,26 +22,9 @@ final public class MdsService: NSObject {
         self.mds!.deactivate();
     }
     
-    /// Start looking for Movesense devices
-    public func startScan(_ deviceFound : @escaping (MovesenseDevice) -> (),
-                          _ scanCompleted: @escaping () -> ()) {
-            self.bleController.startScan(deviceFound: { device in
-                self.devices[device.serial] = device
-                deviceFound(device)
-            },scanReady : {
-                scanCompleted()
-            });
-    }
-    
-    /// Stop looking for Movesense devices
-    public func stopScan() {
-        self.bleController.stopScan()
-    }
-    
     /// Establish a connection to the specific Movesense device
     public func connectDevice(_ address : String) {
         let uuid = UUID.init(uuidString: address)
-        self.bleController.stopScan();
         self.mds.connectPeripheral(with: uuid!);
     }
     

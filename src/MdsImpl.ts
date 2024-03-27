@@ -6,7 +6,6 @@ import ExpoMdsModule from "./ExpoMdsModule";
 const URI_PREFIX = "suunto://";
 
 type OnDeviceConnected = (serial: string, address: string) => void;
-type OnDeviceDiscovered = (name: string, address: string) => void;
 type OnDeviceDisconnected = (serial: string) => void;
 
 const mdsEmitter = new EventEmitter(ExpoMdsModule);
@@ -77,8 +76,6 @@ class MDSImpl {
   #connectedDevicesSubscription: string | undefined;
   #onDeviceConnected: OnDeviceConnected | undefined;
   #onDeviceDisconnected: OnDeviceDisconnected | undefined;
-  #onNewScannedDevice: OnDeviceDiscovered | undefined;
-  #scanSubscription: Subscription | undefined;
   #newNotificationSubscription: Subscription | undefined;
   #newNotificationErrorSubscription: Subscription | undefined;
 
@@ -89,10 +86,6 @@ class MDSImpl {
     this.#subscribedToConnectedDevices = false;
     this.#connectedDevicesSubscription = undefined;
 
-    this.#scanSubscription = mdsEmitter.addListener(
-      "newScannedDevice",
-      this.#handleNewScannedDevice.bind(this)
-    );
     this.#newNotificationSubscription = mdsEmitter.addListener(
       "newNotification",
       this.#handleNewNotification.bind(this)
@@ -102,7 +95,6 @@ class MDSImpl {
       this.#handleNewNotificationError.bind(this)
     );
     this.#mdsEmitter = mdsEmitter;
-    //}
   }
 
   #subscribeToConnectedDevices() {
@@ -150,10 +142,6 @@ class MDSImpl {
     );
   }
 
-  #handleNewScannedDevice(e: Event & { name: string; address: string }) {
-    this.#onNewScannedDevice?.(e.name, e.address);
-  }
-
   #handleNewNotification(e: Event & { notification: string; key: string }) {
     this.#callbacks[e.key]?.success?.(e.notification);
   }
@@ -161,15 +149,6 @@ class MDSImpl {
   #handleNewNotificationError(e: Event & { error: Error; key: string }) {
     console.error("handleNewNotificationError", e);
     this.#callbacks[e.key]?.error?.(e.error);
-  }
-
-  scan(scanHandler: OnDeviceDiscovered) {
-    this.#onNewScannedDevice = scanHandler;
-    ExpoMdsModule.scan();
-  }
-
-  stopScan() {
-    ExpoMdsModule.stopScan();
   }
 
   #connectedDevice:
