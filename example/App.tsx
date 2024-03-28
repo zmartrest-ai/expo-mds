@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MDS from "expo-mds";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Button,
   SafeAreaView,
@@ -10,11 +10,15 @@ import {
   useColorScheme,
 } from "react-native";
 import { BleManager } from "react-native-ble-plx";
+import type { Device } from "react-native-ble-plx";
 
 const bleManager = new BleManager();
 
-type ScanDevice = { name: string; address: string };
-type ConnectedDevice = { name: string; address: string; serial: string };
+/**
+ * android  {"address": "0C:8C:DC:3C:EB:07", "serial": "213330002219"}
+ * ios      {"address": "586AE521-5B62-147E-7EBC-EE37355CFBB5", "serial": "213330002219"}
+ */
+type ConnectedDevice = { serial: string; address: string };
 
 let liveSince: Date | null = null;
 let liveLast: Date | null = null;
@@ -22,8 +26,7 @@ let dataPoints = 0;
 
 const App = () => {
   const isDarkMode = useColorScheme() === "dark";
-  const [devices, setDevices] = useState<ScanDevice[]>([]);
-  const connectingToDevice = useRef<ScanDevice | null>(null);
+  const [devices, setDevices] = useState<Device[]>([]);
   const [scanning, setScanning] = useState<boolean>(false);
   const [error, setError] = useState<string>();
   const [deviceConnected, setDeviceConnected] =
@@ -76,16 +79,24 @@ const App = () => {
 
       if (device == null) return;
 
-      const { id: address, name } = device;
-      console.log("HELLO", name, address);
+      console.log("HELLO", device.name, device.id);
 
-      if (name != null && name.includes("Movesense")) {
-        console.log("Movesense device found", JSON.stringify(device, null, 2));
+      if (device?.name?.includes("Movesense")) {
+        console.log("Movesense device found", device.name, device.id);
+        /* 
+        android:
+          "id": "0C:8C:DC:3C:EB:07"
+          "name": "Movesense 213330002219",
+        
+        ios:
+          "id": "586AE521-5B62-147E-7EBC-EE37355CFBB5",
+          "name": "Movesense 213330002219"
+        */
         setDevices((prev) => {
-          if (prev.find((d) => d.address === address)) {
+          if (prev.find((d) => d.id === device.id)) {
             return prev;
           }
-          return [...prev, { name, address }];
+          return [...prev, device];
         });
       }
     });
@@ -103,11 +114,7 @@ const App = () => {
     MDS.setHandlers(
       (serial: string, address: string) => {
         console.log("setDeviceConnected", { serial, address });
-        setDeviceConnected({
-          serial,
-          address: address ?? connectingToDevice.current?.address,
-          name: address ?? connectingToDevice.current?.name,
-        });
+        setDeviceConnected({ serial, address });
       },
       (serial: string) => {
         console.log("disconnected", serial);
@@ -214,27 +221,19 @@ const App = () => {
             title="Disconnect"
             onPress={() => {
               console.log("disconnect", deviceConnected);
-              if (deviceConnected) {
-                const address = deviceConnected?.address?.replace(/-/g, ":");
-                if (address) {
-                  console.log("address", address);
-                  MDS.disconnect(address);
-                }
-              }
+              MDS.disconnect(deviceConnected.address);
             }}
           />
         ) : (
           devices.map((d) => {
             return (
               <Button
-                key={d.address}
+                key={d.id}
                 title={"Connect to " + d.name}
                 onPress={() => {
                   if (deviceConnected === null) {
-                    console.log("connecting", d.address);
-                    connectingToDevice.current = d;
-                    MDS.connect(d.address);
-                  } else {
+                    console.log("connecting", d.name, d.id);
+                    MDS.connect(d.id);
                   }
                 }}
               />
