@@ -104,11 +104,13 @@ const App = () => {
 
   const stopScan = useCallback(() => {
     console.log("stop scan");
-    setScanning(false);
-    if (!scanning) {
-      bleManager.stopDeviceScan();
-    }
-  }, [scanning]);
+    setScanning((prev) => {
+      if (prev) {
+        bleManager.stopDeviceScan();
+      }
+      return false;
+    });
+  }, []);
 
   useEffect(() => {
     MDS.setHandlers(
