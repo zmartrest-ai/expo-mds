@@ -8,6 +8,8 @@ import {
   StatusBar,
   Text,
   useColorScheme,
+  PermissionsAndroid,
+  Platform,
 } from "react-native";
 import { BleManager } from "react-native-ble-plx";
 import type { Device } from "react-native-ble-plx";
@@ -37,6 +39,20 @@ const App = () => {
     dataPoints: number;
     error?: string;
   }>();
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      ).then((granted) => {
+        if (!granted) {
+          PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          );
+        }
+      });
+    }
+  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem("LAST_SESSION").then((v) => {
