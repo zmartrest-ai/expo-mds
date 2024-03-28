@@ -66,7 +66,7 @@ function withCopyMdsAARfile(config) {
 function withAndroidPermissions(config) {
   return withAndroidManifest(config, (config) => {
     config.modResults.manifest["uses-permission"] = [
-      ...config.modResults.manifest["uses-permission"],
+      ...(config.modResults.manifest["uses-permission"] ?? []),
       { $: { "android:name": "android.permission.BLUETOOTH" } },
       { $: { "android:name": "android.permission.BLUETOOTH_ADMIN" } },
       { $: { "android:name": "android.permission.BLUETOOTH_SCAN" } },
@@ -75,6 +75,16 @@ function withAndroidPermissions(config) {
       { $: { "android:name": "android.permission.BLUETOOTH_CONNECT" } },
       {
         $: { "android:name": "android.permission.ACCESS_BACKGROUND_LOCATION" },
+      },
+    ];
+
+    config.modResults.manifest["uses-feature"] = [
+      ...(config.modResults.manifest["uses-feature"] ?? []),
+      {
+        $: {
+          "android:name": "android.hardware.bluetooth_le",
+          "android:required": "true",
+        },
       },
     ];
 
