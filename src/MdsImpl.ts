@@ -61,6 +61,15 @@ interface Connection {
   UUID: string;
 }
 
+function extractAddressFromResponseBody(body: Response["Body"]): string {
+  if (Platform.OS === "ios") {
+    return body["Connection"]?.["UUID"];
+  }
+
+  // Format from 00-00-00-00-00-00 to 00:00:00:00:00:00 (unable to disconnect otherwise)
+  return body["DeviceInfo"]?.addressInfo[0]?.address.replaceAll("-", ":");
+}
+
 class MDSImpl {
   #subsKey: number;
   #callbacks: Record<
@@ -105,14 +114,10 @@ class MDSImpl {
       {},
       (notification) => {
         const data = JSON.parse(notification) as Response;
-        const address =
-          Platform.OS === "ios"
-            ? data["Body"]["Connection"]?.["UUID"]
-            : // @ts-expect-error room for improvement
-              data.Body.DeviceInfo?.addressInfo[0]?.address;
 
         if (data["Method"] === "POST") {
           if (data.hasOwnProperty("Body")) {
+            const address = extractAddressFromResponseBody(data["Body"]);
             if (data["Body"].hasOwnProperty("DeviceInfo")) {
               if (data["Body"]["DeviceInfo"].hasOwnProperty("Serial")) {
                 const serial = data["Body"]["DeviceInfo"]["Serial"];
