@@ -36,12 +36,6 @@ Run `npx pod-install` after installing the npm package.
 ```
 {
   "expo": {
-    "ios": {
-      "infoPlist": {
-        "NSBluetoothAlwaysUsageDescription": "Use bluetooth to scan for sensor"
-      }
-      ...
-    },
     "plugins": ["expo-mds"]
     ...
   }

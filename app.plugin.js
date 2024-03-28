@@ -3,6 +3,7 @@ const {
   withDangerousMod,
   withPlugins,
   withAndroidManifest,
+  withInfoPlist,
   createRunOncePlugin,
 } = require("@expo/config-plugins");
 const fs = require("fs");
@@ -15,14 +16,14 @@ function withPodfile(config) {
     async (config) => {
       const filePath = path.join(
         config.modRequest.platformProjectRoot,
-        "Podfile"
+        "Podfile",
       );
       const contents = fs.readFileSync(filePath, "utf-8");
 
       const newContents = !contents.includes("movesense")
         ? contents.replace(
             /post_install do \|installer\|/,
-            ` pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib.git'\n\n post_install do |installer|`
+            ` pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib.git'\n\n post_install do |installer|`,
           )
         : contents;
 
@@ -61,7 +62,8 @@ function withCopyMdsAARfile(config) {
   ]);
 }
 
-const configureAndroidPermissions = (config) => {
+/** @type {import('@expo/config-plugins').ConfigPlugin} */
+function withAndroidPermissions(config) {
   return withAndroidManifest(config, (config) => {
     config.modResults.manifest["uses-permission"] = [
       ...config.modResults.manifest["uses-permission"],
@@ -78,7 +80,34 @@ const configureAndroidPermissions = (config) => {
 
     return config;
   });
-};
+}
+
+/** @type {import('@expo/config-plugins').ConfigPlugin} */
+function withIOSPermissions(config) {
+  return withInfoPlist(config, (config) => {
+    config.modResults.NSBluetoothAlwaysUsageDescription =
+      config.modResults.NSBluetoothAlwaysUsageDescription ||
+      "Use bluetooth to scan for sensor";
+
+    return config;
+  });
+}
+
+/** @type {import('@expo/config-plugins').ConfigPlugin} */
+function withBLEBackgroundModes(config) {
+  return withInfoPlist(config, (config) => {
+    if (config.modResults.UIBackgroundModes?.includes("bluetooth-peripheral")) {
+      return config;
+    }
+
+    const backgroundModes = config.modResults.UIBackgroundModes ?? [];
+    backgroundModes.push("bluetooth-peripheral");
+
+    config.modResults.UIBackgroundModes = backgroundModes;
+
+    return config;
+  });
+}
 
 const pkg = require("./package.json");
 
@@ -87,7 +116,9 @@ const mdsPlugins = (config) => {
   return withPlugins(config, [
     withPodfile,
     withCopyMdsAARfile,
-    configureAndroidPermissions,
+    withAndroidPermissions,
+    withIOSPermissions,
+    withBLEBackgroundModes,
   ]);
 };
 

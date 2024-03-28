@@ -44,6 +44,10 @@
     </dict>
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>Use bluetooth to scan for sensor</string>
+    <key>UIBackgroundModes</key>
+    <array>
+      <string>bluetooth-peripheral</string>
+    </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>

@@ -19,10 +19,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.mds.example",
-      "infoPlist": {
-        "NSBluetoothAlwaysUsageDescription": "Use bluetooth to scan for sensor"
-      }
+      "bundleIdentifier": "expo.modules.mds.example"
     },
     "android": {
       "adaptiveIcon": {
