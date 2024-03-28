@@ -88,11 +88,11 @@ class MDSImpl {
 
     this.#newNotificationSubscription = mdsEmitter.addListener(
       "newNotification",
-      this.#handleNewNotification.bind(this)
+      this.#handleNewNotification.bind(this),
     );
     this.#newNotificationErrorSubscription = mdsEmitter.addListener(
       "newNotificationError",
-      this.#handleNewNotificationError.bind(this)
+      this.#handleNewNotificationError.bind(this),
     );
     this.#mdsEmitter = mdsEmitter;
   }
@@ -138,7 +138,7 @@ class MDSImpl {
           this.unsubscribe(this.#connectedDevicesSubscription);
         }
         this.#subscribedToConnectedDevices = false;
-      }
+      },
     );
   }
 
@@ -160,13 +160,13 @@ class MDSImpl {
 
   setHandlers(
     deviceConnected: OnDeviceConnected,
-    deviceDisconnected: OnDeviceDisconnected
+    deviceDisconnected: OnDeviceDisconnected,
   ) {
     this.#onDeviceConnected = deviceConnected;
     if (this.#connectedDevice) {
       deviceConnected(
         this.#connectedDevice.serial,
-        this.#connectedDevice.address
+        this.#connectedDevice.address,
       );
     }
     this.#onDeviceDisconnected = deviceDisconnected;
@@ -185,50 +185,43 @@ class MDSImpl {
   }
 
   get(serial: string, uri: string, contract: Record<string, unknown>) {
-    if (Platform.OS === "android") {
-      return ExpoMdsModule.get(URI_PREFIX + serial + uri, JSON.stringify(contract));
-    } else {
-      return ExpoMdsModule.get(URI_PREFIX + serial + uri, contract);
-    }
+    return ExpoMdsModule.get(
+      URI_PREFIX + serial + uri,
+      Platform.OS === "android" ? JSON.stringify(contract) : contract,
+    );
   }
 
   put(
     serial: string,
     uri: string,
-    contract: Record<string, unknown>
+    contract: Record<string, unknown>,
   ): Promise<string> {
-    if (Platform.OS === "android") {
-      return ExpoMdsModule.put(URI_PREFIX + serial + uri, JSON.stringify(contract));
-    } else {
-      return ExpoMdsModule.put(URI_PREFIX + serial + uri, contract);
-    }
+    return ExpoMdsModule.put(
+      URI_PREFIX + serial + uri,
+      Platform.OS === "android" ? JSON.stringify(contract) : contract,
+    );
   }
 
   post(
     serial: string,
     uri: string,
-    contract: Record<string, unknown>
+    contract: Record<string, unknown>,
   ): Promise<string> {
-    if (Platform.OS === "android") {
-      return ExpoMdsModule.post(URI_PREFIX + serial + uri, JSON.stringify(contract));
-    } else {
-      return ExpoMdsModule.post(URI_PREFIX + serial + uri, contract);
-    }
+    return ExpoMdsModule.post(
+      URI_PREFIX + serial + uri,
+      Platform.OS === "android" ? JSON.stringify(contract) : contract,
+    );
   }
 
   delete(
     serial: string,
     uri: string,
-    contract: Record<string, unknown>
+    contract: Record<string, unknown>,
   ): Promise<string> {
-    if (Platform.OS === "android") {
-      return ExpoMdsModule.delete(
-        URI_PREFIX + serial + uri,
-        JSON.stringify(contract)
-      );
-    } else {
-      return ExpoMdsModule.delete(URI_PREFIX + serial + uri, contract);
-    }
+    return ExpoMdsModule.delete(
+      URI_PREFIX + serial + uri,
+      Platform.OS === "android" ? JSON.stringify(contract) : contract,
+    );
   }
 
   subscribe(
@@ -236,7 +229,7 @@ class MDSImpl {
     uri: string,
     contract: Record<string, unknown>,
     responseCb: (response: string) => void,
-    errorCb: (error: Error) => void
+    errorCb: (error: Error) => void,
   ) {
     this.#subsKey++;
     const subsKeyStr = this.#subsKey.toString();
@@ -246,15 +239,13 @@ class MDSImpl {
       uri,
     };
 
-    // const key = serial + uri + JSON.stringify(contract);
-
     // should probably be eventListeners for both error and success
     if (Platform.OS === "android") {
       contract["Uri"] = serial + uri;
       ExpoMdsModule.subscribe(
         "suunto://MDS/EventListener",
         JSON.stringify(contract),
-        subsKeyStr
+        subsKeyStr,
       );
     } else {
       ExpoMdsModule.subscribe(URI_PREFIX + serial + uri, contract, subsKeyStr);
