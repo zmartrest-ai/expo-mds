@@ -4,8 +4,8 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "npx expo start",
-    "android": "npx expo run:android",
-    "ios": "rm -rf ios && npx expo run:ios --device",
+    "android": "EXPO_PUBLIC_MDS_LIB_PATH=../android/libs npx expo run:android --device",
+    "ios": "npx expo run:ios --device",
     "prebuild": "rm -rf android && rm -rf ios && EXPO_PUBLIC_MDS_LIB_PATH=../android/libs npx expo prebuild"
   },
   "dependencies": {
