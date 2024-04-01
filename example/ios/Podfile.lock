@@ -11,7 +11,7 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (12.8.2):
     - ExpoModulesCore
-  - ExpoMds (0.2.0):
+  - ExpoMds (0.3.0):
     - ExpoModulesCore
     - Movesense
   - ExpoModulesCore (1.11.12):
@@ -1287,7 +1287,7 @@ SPEC CHECKSUMS:
   Expo: e01a77c6fa4bc80a6d1bb949cda1d12d21044abd
   ExpoFileSystem: eecaf6796aed0f4dd20042dc2ca2cac6c4bc1185
   ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c
-  ExpoMds: e9362c51eb7f6bcf314d10bceb9b79921cbce5dc
+  ExpoMds: 5b4b7f8f0b1cabadeefcb9fd154021b1d32a2776
   ExpoModulesCore: 61dc57c6e2a35f2f84baf488146db624e03af4cd
   FBLazyVector: f64d1e2ea739b4d8f7e4740cde18089cd97fe864
   FBReactNativeSpec: 9f2b8b243131565335437dba74923a8d3015e780
