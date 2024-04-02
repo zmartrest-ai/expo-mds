@@ -1,0 +1,26 @@
+{
+  "name": "example-expo",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx expo start",
+    "android": "npx expo run:android",
+    "ios": "rm -rf ios/build && npx expo run:ios --device",
+    "web": "npx expo start --web",
+    "prebuild": "rm -rf android && rm -rf ios && npx expo prebuild"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "1.21.0",
+    "expo": "~50.0.14",
+    "expo-mds": "^0.4.0",
+    "expo-status-bar": "~1.11.1",
+    "react": "18.2.0",
+    "react-native": "0.73.6",
+    "react-native-ble-plx": "^3.1.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/react": "~18.2.45",
+    "typescript": "^5.1.3"
+  },
+  "private": true
+}
