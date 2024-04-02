@@ -1,3 +1,4 @@
+import * as IntentLauncher from "expo-intent-launcher";
 import MDS from "expo-mds";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -31,6 +32,13 @@ const App = () => {
     dataPoints: number;
     error?: string;
   }>();
+
+  useEffect(() => {
+    IntentLauncher.startActivityAsync(
+      IntentLauncher.ActivityAction.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+      { packageName: "expo.modules.mds.example" }
+    );
+  }, []);
 
   useEffect(() => {
     void AsyncStorage.getItem("LAST_SESSION").then((v) => {
@@ -233,6 +241,15 @@ const App = () => {
             {"Last session: " + JSON.stringify(lastSession, null, 2)}
           </Text>
         ) : null}
+
+        <Button
+          title="Battery optimization settings"
+          onPress={() =>
+            IntentLauncher.startActivityAsync(
+              IntentLauncher.ActivityAction.IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+            )
+          }
+        />
       </ScrollView>
     </SafeAreaView>
   );
