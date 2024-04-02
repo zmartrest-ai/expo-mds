@@ -1,10 +1,6 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "expo-mds": ["../src/index"],
-      "expo-mds/*": ["../src/*"]
-    }
+    "strict": true
   }
 }
