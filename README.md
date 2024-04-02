@@ -1,3 +1,5 @@
+Branched from old main which history is deleted since the main branch is completely replaced
+
 # expo-mds
 
 Expo Module for Movesense
