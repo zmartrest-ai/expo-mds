@@ -146,9 +146,7 @@ const App = () => {
       stopScan();
       console.log("subscribing");
       const key = MDS.subscribe(
-        deviceConnected.serial,
-        "/Meas/HR",
-        {},
+        `${deviceConnected.serial}/Meas/HR`,
         (notification: string) => {
           console.log("notification", notification);
           if (!liveSince) {

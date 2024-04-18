@@ -109,9 +109,7 @@ class MDSImpl {
   #subscribeToConnectedDevices() {
     this.#subscribedToConnectedDevices = true;
     this.#connectedDevicesSubscription = this.subscribe(
-      "",
       "MDS/ConnectedDevices",
-      {},
       (notification) => {
         const data = JSON.parse(notification) as Response;
 
@@ -189,52 +187,39 @@ class MDSImpl {
     ExpoMdsModule.disconnect(address);
   }
 
-  get(serial: string, uri: string, contract: Record<string, unknown>) {
+  get(uri: string, contract: Record<string, unknown> = {}): Promise<string> {
     return ExpoMdsModule.get(
-      URI_PREFIX + serial + uri,
+      URI_PREFIX + uri,
       Platform.OS === "android" ? JSON.stringify(contract) : contract,
     );
   }
 
-  put(
-    serial: string,
-    uri: string,
-    contract: Record<string, unknown>,
-  ): Promise<string> {
+  put(uri: string, contract: Record<string, unknown> = {}): Promise<string> {
     return ExpoMdsModule.put(
-      URI_PREFIX + serial + uri,
+      URI_PREFIX + uri,
       Platform.OS === "android" ? JSON.stringify(contract) : contract,
     );
   }
 
-  post(
-    serial: string,
-    uri: string,
-    contract: Record<string, unknown>,
-  ): Promise<string> {
+  post(uri: string, contract: Record<string, unknown> = {}): Promise<string> {
     return ExpoMdsModule.post(
-      URI_PREFIX + serial + uri,
+      URI_PREFIX + uri,
       Platform.OS === "android" ? JSON.stringify(contract) : contract,
     );
   }
 
-  delete(
-    serial: string,
-    uri: string,
-    contract: Record<string, unknown>,
-  ): Promise<string> {
+  delete(uri: string, contract: Record<string, unknown> = {}): Promise<string> {
     return ExpoMdsModule.delete(
-      URI_PREFIX + serial + uri,
+      URI_PREFIX + uri,
       Platform.OS === "android" ? JSON.stringify(contract) : contract,
     );
   }
 
   subscribe(
-    serial: string,
     uri: string,
-    contract: Record<string, unknown>,
     responseCb: (response: string) => void,
     errorCb: (error: Error) => void,
+    contract: Record<string, unknown> = {},
   ) {
     this.#subsKey++;
     const subsKeyStr = this.#subsKey.toString();
@@ -246,14 +231,14 @@ class MDSImpl {
 
     // should probably be eventListeners for both error and success
     if (Platform.OS === "android") {
-      contract["Uri"] = serial + uri;
+      contract["Uri"] = uri;
       ExpoMdsModule.subscribe(
         "suunto://MDS/EventListener",
         JSON.stringify(contract),
         subsKeyStr,
       );
     } else {
-      ExpoMdsModule.subscribe(URI_PREFIX + serial + uri, contract, subsKeyStr);
+      ExpoMdsModule.subscribe(URI_PREFIX + uri, contract, subsKeyStr);
     }
 
     return subsKeyStr;
