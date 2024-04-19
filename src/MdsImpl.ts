@@ -149,9 +149,14 @@ class MDSImpl {
     this.#callbacks[e.key]?.success?.(e.notification);
   }
 
-  #handleNewNotificationError(e: Event & { error: Error; key: string }) {
+  /**
+   * Cannot put an Error in WritableMap on Android so sending the message instead
+   */
+  #handleNewNotificationError(
+    e: Event & { error?: Error; message?: string; key: string },
+  ) {
     console.error("handleNewNotificationError", e);
-    this.#callbacks[e.key]?.error?.(e.error);
+    this.#callbacks[e.key]?.error?.(e.error ?? new Error(e.message));
   }
 
   #connectedDevice:

@@ -47,11 +47,9 @@ class ExpoMdsModule : Module() {
       }
 
       override fun onError(p0: MdsException?) {
-        var exceptionMessage = p0?.message ?: "MdsError";
-        var error = expo.modules.kotlin.exception.CodedException(exceptionMessage)
         sendEvent("newNotificationError", hashMapOf(
                 "key" to key,
-                "error" to error
+                "message" to p0?.message ?: "MdsError"
         ))
       }
 
